@@ -1,13 +1,10 @@
 # Railway Dockerfile for optimized Spring Boot deployment
 FROM openjdk:17 as build
 
-# Install required packages
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
 # Set working directory
 WORKDIR /app
 
-# Copy gradle files
+# Copy gradle wrapper and build files
 COPY gradle gradle
 COPY gradlew .
 COPY gradle.properties .
@@ -26,14 +23,14 @@ RUN ./gradlew clean bootJar --no-daemon
 # Production stage
 FROM openjdk:17
 
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Add non-root user
 RUN groupadd -r spring && useradd -r -g spring spring
 
 # Set working directory
 WORKDIR /app
-
-# Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy jar from build stage
 COPY --from=build /app/build/libs/*.jar app.jar

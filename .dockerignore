@@ -1,0 +1,36 @@
+# Dockerignore for optimized builds
+.git
+.gitignore
+.gitattributes
+.gradle
+.vscode
+build
+target
+*.md
+README.md
+AUTH_README.md
+HELP.md
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.idea
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings
+.vscode
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+src/test/resources/application-test.yml
