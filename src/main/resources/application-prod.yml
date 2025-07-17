@@ -2,8 +2,6 @@
 spring:
   application:
     name: lurniq-api
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:prod}
   
   # Database Configuration - Railway MySQL
   datasource:
