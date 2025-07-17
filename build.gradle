@@ -61,7 +61,13 @@ tasks.named('bootRun') {
 		'-Xmx512m',
 		'-Xms256m',
 		'-XX:+UseG1GC',
-		'-XX:+UseStringDeduplication'
+		'-XX:+UseStringDeduplication',
+		'-XX:+OptimizeStringConcat',
+		'-XX:+UseCompressedOops',
+		'-XX:G1HeapRegionSize=8m',
+		'-XX:MaxGCPauseMillis=200',
+		'-XX:+UseContainerSupport',
+		'-XX:MaxRAMPercentage=75.0'
 	]
 }
 
