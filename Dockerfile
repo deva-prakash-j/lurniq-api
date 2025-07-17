@@ -1,5 +1,5 @@
 # Railway Dockerfile for optimized Spring Boot deployment
-FROM openjdk:17-jdk-slim as build
+FROM openjdk:17 as build
 
 # Install required packages
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
