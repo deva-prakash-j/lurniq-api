@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/success").permitAll()  // Allow OAuth2 success endpoint
                 .requestMatchers("/oauth2/**").permitAll()
                 .requestMatchers("/login/oauth2/**").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()  // Health checks
+                .requestMatchers("/health", "/ready").permitAll()  // Custom health endpoints
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/").permitAll()  // Allow access to root

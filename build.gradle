@@ -29,6 +29,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
@@ -39,6 +41,28 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Optimize JAR for production
+jar {
+	enabled = false
+	archiveClassifier = ''
+}
+
+// Production optimizations
+bootJar {
+	archiveFileName = 'lurniq-api.jar'
+	launchScript()
+}
+
+// JVM optimization for Railway
+tasks.named('bootRun') {
+	jvmArgs = [
+		'-Xmx512m',
+		'-Xms256m',
+		'-XX:+UseG1GC',
+		'-XX:+UseStringDeduplication'
+	]
 }
 
 tasks.named('test') {
