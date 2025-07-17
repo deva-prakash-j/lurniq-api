@@ -38,8 +38,11 @@ WORKDIR /app
 # Copy jar from build stage
 COPY --from=build /app/build/libs/*.jar app.jar
 
+# Copy Railway environment file
+COPY .env.railway .env
+
 # Change ownership
-RUN chown spring:spring app.jar
+RUN chown spring:spring app.jar .env
 
 # Switch to non-root user
 USER spring
@@ -47,9 +50,12 @@ USER spring
 # Expose port
 EXPOSE 8080
 
-# JVM optimization for Railway
+# JVM optimization for Railway - allow override via environment
 ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+OptimizeStringConcat"
-ENV SPRING_PROFILES_ACTIVE=prod
 
-# Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -jar app.jar"]
+# Default profile - can be overridden by Railway environment variable
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+
+# Run the application with environment variables
+# Load .env file first, then Railway environment variables override
+ENTRYPOINT ["sh", "-c", "set -a; [ -f .env ] && . ./.env; set +a; java ${JAVA_OPTS} -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar app.jar"]

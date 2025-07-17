@@ -14,6 +14,9 @@ HELP.md
 .env.local
 .env.*.local
 
+# Include Railway env file
+!.env.railway
+
 # IDE files
 .idea
 *.iml
