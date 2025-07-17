@@ -24,7 +24,7 @@ COPY src src
 RUN ./gradlew clean bootJar --no-daemon
 
 # Production stage
-FROM openjdk:17-jre-slim
+FROM openjdk:17
 
 # Add non-root user
 RUN groupadd -r spring && useradd -r -g spring spring
