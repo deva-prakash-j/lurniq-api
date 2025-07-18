@@ -3,10 +3,6 @@ spring:
   application:
     name: lurniq-api
   
-  # Disable JMX to prevent cgroup issues
-  jmx:
-    enabled: false
-  
   # Database Configuration - Railway MySQL
   datasource:
     url: ${DB_URI}
@@ -49,7 +45,7 @@ spring:
             scope:
               - email
               - profile
-            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/success}
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/auth
