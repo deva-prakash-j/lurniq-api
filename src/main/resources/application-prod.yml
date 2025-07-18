@@ -108,7 +108,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
       base-path: /actuator
   endpoint:
     health:
@@ -116,3 +116,10 @@ management:
   health:
     db:
       enabled: true
+  metrics:
+    enable:
+      system: false
+      process: false
+      jvm: false
+    tags:
+      application: ${spring.application.name}

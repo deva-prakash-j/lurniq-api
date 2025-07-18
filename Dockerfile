@@ -79,7 +79,9 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport \
     -XX:+OptimizeStringConcat \
     -Djava.security.egd=file:/dev/./urandom \
     -Dmanagement.metrics.export.prometheus.enabled=false \
-    -Dmanagement.endpoint.metrics.enabled=false"
+    -Dmanagement.endpoint.metrics.enabled=false \
+    -Djdk.internal.platform.cgroupv1.enabled=false \
+    -Djdk.internal.platform.cgroupv2.enabled=false"
 
 # Run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
