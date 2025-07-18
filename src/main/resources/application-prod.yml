@@ -3,6 +3,10 @@ spring:
   application:
     name: lurniq-api
   
+  # Disable JMX to prevent cgroup issues
+  jmx:
+    enabled: false
+  
   # Database Configuration - Railway MySQL
   datasource:
     url: ${DB_URI}
@@ -108,7 +112,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health
       base-path: /actuator
   endpoint:
     health:
@@ -116,10 +120,3 @@ management:
   health:
     db:
       enabled: true
-  metrics:
-    enable:
-      system: false
-      process: false
-      jvm: false
-    tags:
-      application: ${spring.application.name}

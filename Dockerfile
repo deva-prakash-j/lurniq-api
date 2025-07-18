@@ -81,7 +81,10 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport \
     -Dmanagement.metrics.export.prometheus.enabled=false \
     -Dmanagement.endpoint.metrics.enabled=false \
     -Djdk.internal.platform.cgroupv1.enabled=false \
-    -Djdk.internal.platform.cgroupv2.enabled=false"
+    -Djdk.internal.platform.cgroupv2.enabled=false \
+    -Dcom.sun.management.jmxremote=false \
+    -XX:-UsePerfData \
+    -Dspring.jmx.enabled=false"
 
 # Run the application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
