@@ -77,8 +77,6 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport \
     -XX:+UseG1GC \
     -XX:+UseStringDeduplication \
     -XX:+OptimizeStringConcat \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+UseCGroupMemoryLimitForHeap \
     -Djava.security.egd=file:/dev/./urandom \
     -Dmanagement.metrics.export.prometheus.enabled=false \
     -Dmanagement.endpoint.metrics.enabled=false"
