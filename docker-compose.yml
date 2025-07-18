@@ -1,0 +1,54 @@
+# Docker Compose for Railway Deployment
+# Optimized for Railway's container orchestration
+version: '3.8'
+
+services:
+  # Lurniq API Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    
+    # Railway automatically sets PORT, but we can specify fallback
+    environment:
+      - PORT=${PORT:-8080}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-prod}
+      
+      # Database connection (Railway will inject MySQL service variables)
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      
+      # JWT Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      
+      # OAuth2 Configuration
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-https://$${RAILWAY_STATIC_URL}/login/oauth2/code/google}
+      - OAUTH2_REDIRECT_URL=${OAUTH2_REDIRECT_URL:-https://$${RAILWAY_STATIC_URL}/auth/success}
+      
+      # Application Configuration
+      - DDL_AUTO=${DDL_AUTO:-update}
+      
+      # JVM Options for Railway containers
+      - JAVA_OPTS=${JAVA_OPTS:--Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+OptimizeStringConcat -XX:+UseCompressedOops -XX:G1HeapRegionSize=8m -XX:MaxGCPauseMillis=200 -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
+      
+      # Logging
+      - LOGGING_LEVEL_ROOT=${LOGGING_LEVEL_ROOT:-INFO}
+      - LOGGING_LEVEL_COM_LURNIQ=${LOGGING_LEVEL_COM_LURNIQ:-INFO}
+    
+    # Railway automatically maps the PORT, but we expose it for clarity
+    expose:
+      - "${PORT:-8080}"
+    
+    # Health check for Railway monitoring
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8080}/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+# Railway automatically handles networking, so no custom networks needed
