@@ -1,5 +1,6 @@
 package com.lurniq.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,6 +10,9 @@ import java.util.Map;
 
 @RestController
 public class RootController {
+
+    @Value("${OAUTH2_REDIRECT_URL}")
+    private String oauth2RedirectUrl;
     
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> root() {
@@ -20,7 +24,8 @@ public class RootController {
                 "login", "/api/auth/login",
                 "google_oauth", "/oauth2/authorization/google",
                 "user_profile", "/api/user/profile",
-                "refresh_token", "/api/auth/refresh-token"
+                "refresh_token", "/api/auth/refresh-token",
+                "redirectUri", oauth2RedirectUrl
             ),
             "error_handling", Map.of(
                 "description", "Global exception handling is enabled",
