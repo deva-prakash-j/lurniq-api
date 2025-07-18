@@ -116,6 +116,14 @@ management:
   health:
     db:
       enabled: true
+  metrics:
+    enable:
+      jvm: true
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
   prometheus:
     metrics:
       export:
