@@ -1,5 +1,7 @@
 package com.lurniq.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,30 +21,40 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
+@Schema(description = "User entity representing a registered user in the system")
 public class User implements UserDetails {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "User's unique identifier", example = "1")
     private Long id;
     
     @Column(unique = true, nullable = false)
+    @Schema(description = "User's email address", example = "user@example.com")
     private String email;
     
+    @JsonIgnore
+    @Schema(hidden = true)
     private String password;
     
     @Column(name = "first_name")
+    @Schema(description = "User's first name", example = "John")
     private String firstName;
     
     @Column(name = "last_name")
+    @Schema(description = "User's last name", example = "Doe")
     private String lastName;
     
     @Column(name = "profile_picture")
+    @Schema(description = "URL to user's profile picture", example = "https://example.com/profile.jpg")
     private String profilePicture;
     
     @Enumerated(EnumType.STRING)
+    @Schema(description = "User's role in the system", example = "USER")
     private Role role;
     
     @Enumerated(EnumType.STRING)
+    @Schema(description = "User's authentication provider", example = "EMAIL")
     private AuthProvider provider;
     
     @Column(name = "provider_id")
