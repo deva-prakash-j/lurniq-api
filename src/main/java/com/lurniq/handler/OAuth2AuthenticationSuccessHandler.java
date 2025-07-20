@@ -27,6 +27,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${oauth2.redirect-url:http://localhost:8080/auth/success}")
     private String redirectUrl;
     
+    @Value("${oauth2.frontend-base-url:http://localhost:4200}")
+    private String frontendBaseUrl;
+    
     @Override
     public void onAuthenticationSuccess(
             HttpServletRequest request, 
@@ -44,11 +47,30 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String token = jwtUtil.generateToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
         
-        // Redirect to configured URL with tokens
-        String finalRedirectUrl = String.format(
-            "%s?token=%s&refreshToken=%s", 
-            redirectUrl, token, refreshToken
-        );
+        // Check if request came from Angular app using state parameter
+        String state = request.getParameter("state");
+        
+        // Check if this was a frontend request by parsing the state
+        boolean isFrontend = false;
+        if (state != null && state.contains("|frontend=true")) {
+            isFrontend = true;
+        }
+        
+        String finalRedirectUrl;
+        
+        if (isFrontend) {
+            // Redirect to Angular app with tokens in URL fragments (more secure for SPAs)
+            finalRedirectUrl = String.format(
+                "%s/auth/callback#access_token=%s&refresh_token=%s&token_type=Bearer", 
+                frontendBaseUrl, token, refreshToken
+            );
+        } else {
+            // Default behavior - redirect to backend success page
+            finalRedirectUrl = String.format(
+                "%s?token=%s&refreshToken=%s", 
+                redirectUrl, token, refreshToken
+            );
+        }
         
         getRedirectStrategy().sendRedirect(request, response, finalRedirectUrl);
     }
