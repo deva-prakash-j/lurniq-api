@@ -66,7 +66,7 @@ jib {
     }
     to {
         image = System.getProperty("jib.to.image", "lurniq/lurniq-api")
-        tags = System.getProperty("jib.to.tags")?.split(",")?.toSet() ?: setOf("latest", version.toString())
+        tags = System.getProperty("jib.to.tags")?.split(",") ?: ["latest", version.toString()]
     }
     container {
         jvmFlags = listOf(
