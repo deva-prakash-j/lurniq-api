@@ -65,9 +65,11 @@ jobs:
     
     - name: Build and push Docker image with Jib
       run: |
+        # Extract the first tag for the main image name
+        MAIN_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+        
         ./gradlew jib \
-          -Djib.to.image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
-          -Djib.to.tags=${{ steps.meta.outputs.tags }} \
+          -Djib.to.image="$MAIN_TAG" \
           -Djib.to.auth.username=${{ github.actor }} \
           -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
       env:
