@@ -69,7 +69,7 @@ jib {
         tags = System.getProperty("jib.to.tags")?.split(",") ?: ["latest", version.toString()]
     }
     container {
-        jvmFlags = listOf(
+        jvmFlags = [
             "-Dspring.profiles.active=prod",
             "-Xmx512m",
             "-Xms256m",
@@ -80,8 +80,8 @@ jib {
             "-XX:G1HeapRegionSize=8m",
             "-XX:MaxGCPauseMillis=200",
             "-XX:MaxRAMPercentage=75.0"
-        )
-        ports = listOf("8080")
+        ]
+        ports = ["8080"]
         user = "1000:1000"
         environment = [
             "SPRING_PROFILES_ACTIVE": "prod"
