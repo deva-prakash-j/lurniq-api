@@ -35,6 +35,30 @@ spring:
     resources:
       add-mappings: false
   
+  # Mail Configuration
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: ${MAIL_HOST:smtp.gmail.com}
+        debug: false
+  
+  # Thymeleaf Configuration for Email Templates
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+  
 server:
   port: 8080
   error:
@@ -53,6 +77,19 @@ jwt:
 oauth2:
   redirect-url: ${OAUTH2_REDIRECT_URL:http://localhost:8080/auth/success}
   frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:4200}
+
+# Email Configuration
+email:
+  from: ${EMAIL_FROM:noreply@lurniq.com}
+  from-name: ${EMAIL_FROM_NAME:Lurniq Team}
+  activation:
+    subject: "Activate Your Lurniq Account"
+    expiration-hours: 24
+    base-url: ${EMAIL_ACTIVATION_BASE_URL:http://localhost:8080/auth/activate}
+  password-reset:
+    subject: "Reset Your Lurniq Password"
+    expiration-hours: 1
+    max-requests-per-hour: 3
 
 logging:
     level:

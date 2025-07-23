@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate Your Lurniq Account</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8fafc;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+        
+        .activation-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: transform 0.2s ease;
+        }
+        
+        .activation-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .alternative-link {
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .alternative-link p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #718096;
+        }
+        
+        .alternative-link code {
+            background-color: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #2d3748;
+        }
+        
+        .security-notice {
+            background-color: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .security-notice h3 {
+            margin: 0 0 10px 0;
+            color: #c53030;
+            font-size: 16px;
+        }
+        
+        .security-notice p {
+            margin: 0;
+            color: #742a2a;
+            font-size: 14px;
+        }
+        
+        .features {
+            background-color: #f7fafc;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .features h3 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+            font-size: 18px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            color: #4a5568;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .feature-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+        }
+        
+        .footer {
+            background-color: #2d3748;
+            color: #a0aec0;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        
+        .footer-note {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #4a5568;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .header, .content, .footer {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .activation-button {
+                padding: 14px 24px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🎓 Lurniq</div>
+            <h1>Welcome to Lurniq!</h1>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hello <span th:text="${firstName}">User</span>! 👋
+            </div>
+            
+            <div class="message">
+                Thank you for signing up for Lurniq! We're excited to have you join our learning community. 
+                To get started and ensure the security of your account, please activate your account by clicking 
+                the button below.
+            </div>
+            
+            <div class="button-container">
+                <a th:href="${activationUrl}" class="activation-button">
+                    Activate My Account
+                </a>
+            </div>
+            
+            <div class="alternative-link">
+                <p>If the button above doesn't work, you can also copy and paste this link into your browser:</p>
+                <code th:text="${activationUrl}">https://api.lurniq.com/auth/activate?token=your-token-here</code>
+            </div>
+            
+            <div class="security-notice">
+                <h3>🔒 Security Notice</h3>
+                <p>This activation link will expire in <strong>24 hours</strong> for your security. 
+                If you didn't create an account with us, please ignore this email.</p>
+            </div>
+            
+            <div class="features">
+                <h3>What you can do with Lurniq:</h3>
+                <ul class="feature-list">
+                    <li>Access personalized learning content</li>
+                    <li>Track your learning progress</li>
+                    <li>Connect with fellow learners</li>
+                    <li>Get expert guidance and support</li>
+                    <li>Earn certificates and achievements</li>
+                </ul>
+            </div>
+            
+            <div class="message">
+                If you have any questions or need assistance, feel free to reach out to our support team. 
+                We're here to help you succeed in your learning journey!
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Lurniq Team</strong></p>
+            <p>Empowering learners, one course at a time</p>
+            
+            <div class="social-links">
+                <a href="https://lurniq.com/support">Support</a>
+                <a href="https://lurniq.com/privacy">Privacy Policy</a>
+                <a href="https://lurniq.com/terms">Terms of Service</a>
+            </div>
+            
+            <div class="footer-note">
+                <p>This email was sent to <span th:text="${email}">user@example.com</span></p>
+                <p>© 2025 Lurniq. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

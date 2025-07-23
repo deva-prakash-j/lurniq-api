@@ -3,6 +3,7 @@ package com.lurniq.controller;
 import com.lurniq.dto.AuthResponse;
 import com.lurniq.dto.LoginRequest;
 import com.lurniq.dto.RegisterRequest;
+import com.lurniq.dto.RegistrationResponse;
 import com.lurniq.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,12 +28,12 @@ public class AuthController {
     @Operation(summary = "Register new user", description = "Register a new user with email and password")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "User registered successfully", 
-                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+                    content = @Content(schema = @Schema(implementation = RegistrationResponse.class))),
         @ApiResponse(responseCode = "400", description = "Invalid request data"),
         @ApiResponse(responseCode = "409", description = "User already exists")
     })
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
+    public ResponseEntity<RegistrationResponse> register(@Valid @RequestBody RegisterRequest request) {
+        RegistrationResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
     

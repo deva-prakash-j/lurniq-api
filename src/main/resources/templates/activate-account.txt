@@ -1,0 +1,34 @@
+Welcome to Lurniq!
+====================================
+
+Hello [[${firstName}]]!
+
+Thank you for signing up for Lurniq! We're excited to have you join our learning community.
+
+To get started and ensure the security of your account, please activate your account by visiting the following link:
+
+[[${activationUrl}]]
+
+🔒 SECURITY NOTICE:
+This activation link will expire in 24 hours for your security. If you didn't create an account with us, please ignore this email.
+
+What you can do with Lurniq:
+✓ Access personalized learning content
+✓ Track your learning progress  
+✓ Connect with fellow learners
+✓ Get expert guidance and support
+✓ Earn certificates and achievements
+
+If you have any questions or need assistance, feel free to reach out to our support team. We're here to help you succeed in your learning journey!
+
+Best regards,
+The Lurniq Team
+Empowering learners, one course at a time
+
+---
+Support: https://lurniq.com/support
+Privacy Policy: https://lurniq.com/privacy
+Terms of Service: https://lurniq.com/terms
+
+This email was sent to [[${email}]]
+© 2025 Lurniq. All rights reserved.

@@ -1,8 +1,6 @@
 package com.lurniq.service;
 
-import com.lurniq.dto.AuthResponse;
-import com.lurniq.dto.LoginRequest;
-import com.lurniq.dto.RegisterRequest;
+import com.lurniq.dto.*;
 import com.lurniq.entity.User;
 import com.lurniq.repository.UserRepository;
 import com.lurniq.util.JwtUtil;
@@ -20,8 +18,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final EmailVerificationService emailVerificationService;
     
-    public AuthResponse register(RegisterRequest request) {
+    public RegistrationResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
@@ -38,13 +37,26 @@ public class AuthService {
         
         User savedUser = userRepository.save(user);
         
-        String jwtToken = jwtUtil.generateToken(savedUser);
-        String refreshToken = jwtUtil.generateRefreshToken(savedUser);
+        // Send activation email (async)
+        try {
+            emailVerificationService.sendActivationEmail(savedUser);
+        } catch (Exception e) {
+            // Log the error but don't fail the registration
+            System.err.println("Failed to send activation email: " + e.getMessage());
+        }
         
-        return AuthResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .user(savedUser)
+        // Return secure registration response (no tokens until email verified)
+        return RegistrationResponse.builder()
+                .success(true)
+                .message("Account created successfully! Please check your email to activate your account.")
+                .user(RegistrationResponse.UserInfo.builder()
+                        .id(savedUser.getId())
+                        .email(savedUser.getEmail())
+                        .firstName(savedUser.getFirstName())
+                        .lastName(savedUser.getLastName())
+                        .emailVerified(savedUser.getEmailVerified())
+                        .build())
+                .nextStep("email_verification")
                 .build();
     }
     
@@ -58,6 +70,11 @@ public class AuthService {
         
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Check if email is verified before issuing tokens
+        if (!user.getEmailVerified()) {
+            throw new RuntimeException("Email not verified. Please check your email and activate your account.");
+        }
         
         String jwtToken = jwtUtil.generateToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);

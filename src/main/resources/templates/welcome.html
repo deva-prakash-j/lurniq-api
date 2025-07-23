@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Lurniq!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8fafc;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .celebration {
+            text-align: center;
+            font-size: 48px;
+            margin: 20px 0;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 16px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: transform 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .next-steps {
+            background-color: #f7fafc;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .next-steps h3 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+            font-size: 18px;
+        }
+        
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .step-list li {
+            padding: 8px 0;
+            color: #4a5568;
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .step-list li:before {
+            content: attr(data-step);
+            position: absolute;
+            left: 0;
+            top: 8px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .support-section {
+            background-color: #edf2f7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .support-section h3 {
+            margin: 0 0 10px 0;
+            color: #2d3748;
+        }
+        
+        .footer {
+            background-color: #2d3748;
+            color: #a0aec0;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            color: #a0aec0;
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        
+        .footer-note {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #4a5568;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                box-shadow: none;
+            }
+            
+            .header, .content, .footer {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .cta-button {
+                padding: 14px 24px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="logo">🎓 Lurniq</div>
+            <h1>Account Activated!</h1>
+        </div>
+        
+        <div class="content">
+            <div class="celebration">🎉</div>
+            
+            <div class="greeting">
+                Congratulations <span th:text="${firstName}">User</span>!
+            </div>
+            
+            <div class="message">
+                Your Lurniq account has been successfully activated! Welcome to our learning community. 
+                We're thrilled to have you on board and can't wait to see what you'll achieve.
+            </div>
+            
+            <div class="button-container">
+                <a th:href="${dashboardUrl}" class="cta-button">
+                    Start Learning Now
+                </a>
+            </div>
+            
+            <div class="next-steps">
+                <h3>Your Learning Journey Starts Here:</h3>
+                <ul class="step-list">
+                    <li data-step="1">Complete your profile to get personalized recommendations</li>
+                    <li data-step="2">Browse our course catalog and find topics that interest you</li>
+                    <li data-step="3">Join study groups and connect with fellow learners</li>
+                    <li data-step="4">Start your first course and earn your first achievement</li>
+                </ul>
+            </div>
+            
+            <div class="message">
+                Remember, learning is a journey, not a destination. Take your time, stay curious, 
+                and don't hesitate to reach out if you need any help along the way.
+            </div>
+            
+            <div class="support-section">
+                <h3>Need Help Getting Started?</h3>
+                <p>Our support team is here to help you every step of the way. 
+                Check out our Help Center or contact us directly.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>The Lurniq Team</strong></p>
+            <p>Empowering learners, one course at a time</p>
+            
+            <div class="social-links">
+                <a href="https://lurniq.com/help">Help Center</a>
+                <a href="https://lurniq.com/support">Support</a>
+                <a href="https://lurniq.com/community">Community</a>
+            </div>
+            
+            <div class="footer-note">
+                <p>This email was sent to <span th:text="${email}">user@example.com</span></p>
+                <p>© 2025 Lurniq. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
