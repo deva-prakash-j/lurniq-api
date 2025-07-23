@@ -3,12 +3,11 @@ spring:
   application:
     name: lurniq-api
   
-  # Database Configuration - Railway MySQL
   datasource:
     url: ${DB_URI}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -25,7 +24,7 @@ spring:
     properties:
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           batch_size: 20
           order_inserts: true
