@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id("com.google.cloud.tools.jib") version "3.4.0"
 }
 
 group = 'com.lurniq'
@@ -55,21 +56,35 @@ bootJar {
 	launchScript()
 }
 
-// JVM optimization for Railway
-tasks.named('bootRun') {
-	jvmArgs = [
-		'-Xmx512m',
-		'-Xms256m',
-		'-XX:+UseG1GC',
-		'-XX:+UseStringDeduplication',
-		'-XX:+OptimizeStringConcat',
-		'-XX:+UseCompressedOops',
-		'-XX:G1HeapRegionSize=8m',
-		'-XX:MaxGCPauseMillis=200',
-		'-XX:MaxRAMPercentage=75.0'
-	]
-}
-
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+jib {
+    from {
+        image = "eclipse-temurin:17-jdk-alpine"
+    }
+    to {
+        image = System.getProperty("jib.to.image", "lurniq/lurniq-api")
+        tags = System.getProperty("jib.to.tags")?.split(",")?.toSet() ?: setOf("latest", version.toString())
+    }
+    container {
+        jvmFlags = listOf(
+            "-Dspring.profiles.active=prod",
+            "-Xmx512m",
+            "-Xms256m",
+            "-XX:+UseG1GC",
+            "-XX:+UseStringDeduplication",
+            "-XX:+OptimizeStringConcat",
+            "-XX:+UseCompressedOops",
+            "-XX:G1HeapRegionSize=8m",
+            "-XX:MaxGCPauseMillis=200",
+            "-XX:MaxRAMPercentage=75.0"
+        )
+        ports = listOf("8080")
+        user = "1000:1000"
+        environment = [
+            "SPRING_PROFILES_ACTIVE": "prod"
+        ]
+    }
 }
