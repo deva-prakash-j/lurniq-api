@@ -82,7 +82,7 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
-                .user(user)
+                .user(UserProfileResponse.fromUser(user))
                 .build();
     }
     
@@ -101,7 +101,7 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshToken)
-                .user(user)
+                .user(UserProfileResponse.fromUser(user))
                 .build();
     }
 }

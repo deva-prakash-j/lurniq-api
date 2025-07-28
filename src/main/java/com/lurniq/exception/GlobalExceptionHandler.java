@@ -1,11 +1,14 @@
 package com.lurniq.exception;
 
+import com.lurniq.dto.ErrorResponse;
+import com.lurniq.service.RequestTrackingService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,23 +22,25 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+    
+    private final RequestTrackingService requestTrackingService;
     
     // JWT Exception Handlers
     @ExceptionHandler(ExpiredJwtException.class)
-    public ResponseEntity<Map<String, Object>> handleExpiredJwtException(
+    public ResponseEntity<ErrorResponse> handleExpiredJwtException(
             ExpiredJwtException ex, 
             HttpServletRequest request
     ) {
         log.warn("JWT expired for request {}: {}", request.getRequestURI(), ex.getMessage());
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.UNAUTHORIZED,
             "JWT_EXPIRED",
             "Your session has expired. Please log in again.",
@@ -46,13 +51,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(SignatureException.class)
-    public ResponseEntity<Map<String, Object>> handleSignatureException(
+    public ResponseEntity<ErrorResponse> handleSignatureException(
             SignatureException ex, 
             HttpServletRequest request
     ) {
         log.warn("Invalid JWT signature for request {}: {}", request.getRequestURI(), ex.getMessage());
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.UNAUTHORIZED,
             "JWT_INVALID_SIGNATURE",
             "Invalid token signature. Please log in again.",
@@ -63,13 +68,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(MalformedJwtException.class)
-    public ResponseEntity<Map<String, Object>> handleMalformedJwtException(
+    public ResponseEntity<ErrorResponse> handleMalformedJwtException(
             MalformedJwtException ex, 
             HttpServletRequest request
     ) {
         log.warn("Malformed JWT for request {}: {}", request.getRequestURI(), ex.getMessage());
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST,
             "JWT_MALFORMED",
             "Invalid token format. Please log in again.",
@@ -80,13 +85,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(UnsupportedJwtException.class)
-    public ResponseEntity<Map<String, Object>> handleUnsupportedJwtException(
+    public ResponseEntity<ErrorResponse> handleUnsupportedJwtException(
             UnsupportedJwtException ex, 
             HttpServletRequest request
     ) {
         log.warn("Unsupported JWT for request {}: {}", request.getRequestURI(), ex.getMessage());
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST,
             "JWT_UNSUPPORTED",
             "Unsupported token format. Please log in again.",
@@ -97,13 +102,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<Map<String, Object>> handleJwtException(
+    public ResponseEntity<ErrorResponse> handleJwtException(
             JwtException ex, 
             HttpServletRequest request
     ) {
         log.warn("JWT validation error for request {}: {}", request.getRequestURI(), ex.getMessage());
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.UNAUTHORIZED,
             "JWT_ERROR",
             "Token validation failed. Please log in again.",
@@ -113,15 +118,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
     
-    // Existing Exception Handlers
+    // General Exception Handlers
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(
+    public ResponseEntity<ErrorResponse> handleNotFound(
             NoHandlerFoundException ex, 
             HttpServletRequest request
     ) {
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.NOT_FOUND,
-            "Endpoint not found",
+            "ENDPOINT_NOT_FOUND",
             "The requested endpoint " + request.getRequestURI() + " was not found",
             request.getRequestURI()
         );
@@ -130,45 +135,24 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<Map<String, Object>> handleMethodNotAllowed(
+    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(
             HttpRequestMethodNotSupportedException ex, 
             HttpServletRequest request
     ) {
         String supportedMethods = String.join(", ", ex.getSupportedMethods());
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.METHOD_NOT_ALLOWED,
-            "Method not allowed",
+            "METHOD_NOT_ALLOWED",
             "HTTP method " + ex.getMethod() + " is not supported for this endpoint. Supported methods: " + supportedMethods,
             request.getRequestURI()
         );
         
-        errorResponse.put("supportedMethods", ex.getSupportedMethods());
-        
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
     }
     
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleInternalServerError(
-            Exception ex, 
-            HttpServletRequest request
-    ) {
-        Map<String, Object> errorResponse = createErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "Internal server error",
-            "An unexpected error occurred. Please try again later.",
-            request.getRequestURI()
-        );
-        
-        // Log the actual exception for debugging (you can use a logger here)
-        System.err.println("Internal Server Error: " + ex.getMessage());
-        ex.printStackTrace();
-        
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
-    
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(
+    public ResponseEntity<ErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
@@ -180,26 +164,25 @@ public class GlobalExceptionHandler {
             fieldErrors.put(fieldName, errorMessage);
         });
         
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponseWithFieldErrors(
             HttpStatus.BAD_REQUEST,
-            "Validation failed",
+            "VALIDATION_FAILED",
             "Invalid input data provided",
-            request.getRequestURI()
+            request.getRequestURI(),
+            fieldErrors
         );
-        
-        errorResponse.put("fieldErrors", fieldErrors);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidJson(
+    public ResponseEntity<ErrorResponse> handleInvalidJson(
             HttpMessageNotReadableException ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST,
-            "Invalid JSON",
+            "INVALID_JSON",
             "Request body contains invalid JSON format",
             request.getRequestURI()
         );
@@ -208,13 +191,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentials(
+    public ResponseEntity<ErrorResponse> handleBadCredentials(
             BadCredentialsException ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.UNAUTHORIZED,
-            "Invalid credentials",
+            "INVALID_CREDENTIALS",
             "The provided credentials are invalid",
             request.getRequestURI()
         );
@@ -223,13 +206,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFound(
+    public ResponseEntity<ErrorResponse> handleUserNotFound(
             UsernameNotFoundException ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.NOT_FOUND,
-            "User not found",
+            "USER_NOT_FOUND",
             ex.getMessage(),
             request.getRequestURI()
         );
@@ -238,13 +221,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntimeException(
+    public ResponseEntity<ErrorResponse> handleRuntimeException(
             RuntimeException ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST,
-            "Bad request",
+            "BAD_REQUEST",
             ex.getMessage(),
             request.getRequestURI()
         );
@@ -253,13 +236,13 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(
             IllegalArgumentException ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> errorResponse = createErrorResponse(
+        ErrorResponse errorResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST,
-            "Invalid argument",
+            "INVALID_ARGUMENT",
             ex.getMessage(),
             request.getRequestURI()
         );
@@ -267,19 +250,46 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
     
-    private Map<String, Object> createErrorResponse(
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleInternalServerError(
+            Exception ex, 
+            HttpServletRequest request
+    ) {
+        log.error("Internal Server Error for request {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        
+        ErrorResponse errorResponse = createErrorResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "INTERNAL_SERVER_ERROR",
+            "An unexpected error occurred. Please try again later.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+    
+    // Helper methods for creating error responses
+    private ErrorResponse createErrorResponse(
             HttpStatus status, 
             String error, 
             String message, 
             String path
     ) {
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("timestamp", LocalDateTime.now());
-        errorResponse.put("status", status.value());
-        errorResponse.put("error", error);
-        errorResponse.put("message", message);
-        errorResponse.put("path", path);
+        String traceId = requestTrackingService.getTraceId();
+        Long timeTaken = requestTrackingService.getTimeTaken();
         
-        return errorResponse;
+        return ErrorResponse.of(status.value(), error, message, path, traceId, timeTaken);
+    }
+    
+    private ErrorResponse createErrorResponseWithFieldErrors(
+            HttpStatus status, 
+            String error, 
+            String message, 
+            String path,
+            Map<String, String> fieldErrors
+    ) {
+        String traceId = requestTrackingService.getTraceId();
+        Long timeTaken = requestTrackingService.getTimeTaken();
+        
+        return ErrorResponse.withFieldErrors(status.value(), error, message, path, traceId, timeTaken, fieldErrors);
     }
 }

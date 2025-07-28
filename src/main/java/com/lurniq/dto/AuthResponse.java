@@ -1,6 +1,5 @@
 package com.lurniq.dto;
 
-import com.lurniq.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +23,6 @@ public class AuthResponse {
     @Schema(description = "Token type", example = "Bearer")
     private String tokenType = "Bearer";
     
-    @Schema(description = "User information")
-    private User user;
+    @Schema(description = "User profile information")
+    private UserProfileResponse user;
 }

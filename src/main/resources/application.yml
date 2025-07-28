@@ -105,6 +105,20 @@ logging:
     level:
       org.springframework: INFO
       com.lurniq: INFO
+    pattern:
+      console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr([%thread]){magenta} %clr(%-5level){highlight} %clr([%X{traceId:-},%X{spanId:-}]){cyan} %clr(%logger{36}){blue} - %msg%n"
+      file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+
+# OpenTelemetry Configuration
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,tracing
 
 # OpenAPI/Swagger Configuration
 springdoc:

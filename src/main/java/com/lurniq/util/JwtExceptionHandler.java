@@ -2,6 +2,7 @@ package com.lurniq.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lurniq.dto.ErrorResponse;
+import com.lurniq.service.RequestTrackingService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -17,15 +18,25 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class JwtExceptionHandler {
     
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RequestTrackingService requestTrackingService;
     
     public void handleJwtException(HttpServletResponse response, Exception exception, String requestUri) throws IOException {
         ErrorResponse errorResponse;
         HttpStatus status;
+        
+        // Get current trace ID from MDC
+        String traceId = requestTrackingService.getTraceId();
+        if (traceId == null || traceId.isEmpty()) {
+            traceId = "unknown";
+        }
+        
+        // Get elapsed time
+        Long timeTaken = requestTrackingService.getTimeTaken();
         
         if (exception instanceof ExpiredJwtException) {
             status = HttpStatus.UNAUTHORIZED;
@@ -33,9 +44,11 @@ public class JwtExceptionHandler {
                 status.value(),
                 "JWT_EXPIRED",
                 "Your session has expired. Please log in again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.warn("JWT expired for request: {} - {}", requestUri, exception.getMessage());
+            log.warn("JWT expired for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage());
             
         } else if (exception instanceof SignatureException) {
             status = HttpStatus.UNAUTHORIZED;
@@ -43,9 +56,11 @@ public class JwtExceptionHandler {
                 status.value(),
                 "JWT_INVALID_SIGNATURE",
                 "Invalid token signature. Please log in again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.warn("Invalid JWT signature for request: {} - {}", requestUri, exception.getMessage());
+            log.warn("Invalid JWT signature for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage());
             
         } else if (exception instanceof MalformedJwtException) {
             status = HttpStatus.BAD_REQUEST;
@@ -53,9 +68,11 @@ public class JwtExceptionHandler {
                 status.value(),
                 "JWT_MALFORMED",
                 "Invalid token format. Please log in again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.warn("Malformed JWT for request: {} - {}", requestUri, exception.getMessage());
+            log.warn("Malformed JWT for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage());
             
         } else if (exception instanceof UnsupportedJwtException) {
             status = HttpStatus.BAD_REQUEST;
@@ -63,9 +80,11 @@ public class JwtExceptionHandler {
                 status.value(),
                 "JWT_UNSUPPORTED",
                 "Unsupported token format. Please log in again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.warn("Unsupported JWT for request: {} - {}", requestUri, exception.getMessage());
+            log.warn("Unsupported JWT for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage());
             
         } else if (exception instanceof IllegalArgumentException) {
             status = HttpStatus.BAD_REQUEST;
@@ -73,9 +92,11 @@ public class JwtExceptionHandler {
                 status.value(),
                 "JWT_INVALID",
                 "Invalid token. Please log in again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.warn("Invalid JWT argument for request: {} - {}", requestUri, exception.getMessage());
+            log.warn("Invalid JWT argument for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage());
             
         } else if (exception instanceof JwtException) {
             status = HttpStatus.UNAUTHORIZED;
@@ -83,9 +104,11 @@ public class JwtExceptionHandler {
                 status.value(),
                 "JWT_ERROR",
                 "Token validation failed. Please log in again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.warn("JWT validation error for request: {} - {}", requestUri, exception.getMessage());
+            log.warn("JWT validation error for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage());
             
         } else {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -93,14 +116,19 @@ public class JwtExceptionHandler {
                 status.value(),
                 "INTERNAL_ERROR",
                 "An unexpected error occurred. Please try again.",
-                requestUri
+                requestUri,
+                traceId,
+                timeTaken
             );
-            log.error("Unexpected error during JWT processing for request: {} - {}", requestUri, exception.getMessage(), exception);
+            log.error("Unexpected error during JWT processing for request: {} - TraceID: {} - {}", requestUri, traceId, exception.getMessage(), exception);
         }
         
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
+        
+        // Add trace ID to response header
+        response.setHeader("X-Trace-ID", traceId);
         
         String jsonResponse = objectMapper.writeValueAsString(errorResponse);
         response.getWriter().write(jsonResponse);
