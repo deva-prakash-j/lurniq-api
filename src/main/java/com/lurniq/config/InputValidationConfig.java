@@ -29,17 +29,15 @@ public class InputValidationConfig {
 
     public static class InputValidationFilter extends OncePerRequestFilter {
         
-        // Common XSS patterns
+        // Common XSS patterns - more specific to avoid false positives
         private static final Pattern XSS_PATTERN = Pattern.compile(
-            "(?i)(.*(<script|</script|javascript:|vbscript:|onload=|onerror=|onclick=).*)|" +
-            "(.*(<object|</object|<embed|</embed|<applet|</applet).*)", 
+            "(?i)(<script[^>]*>.*?</script>|javascript\\s*:|vbscript\\s*:|data\\s*:.*?base64|on\\w+\\s*=)", 
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         );
         
-        // SQL injection patterns - more precise to avoid false positives
+        // SQL injection patterns - more precise to avoid false positives  
         private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
-            "(?i)(.*('|(\\-\\-)|(%27)|(%2D%2D)).*)|" +  // Quote and comment patterns
-            "(.*\\b(ALTER\\s+TABLE|CREATE\\s+TABLE|DELETE\\s+FROM|DROP\\s+TABLE|EXEC(UTE)?\\s*\\(|INSERT\\s+INTO|SELECT\\s+.*\\s+FROM|UPDATE\\s+.*\\s+SET|UNION\\s+(ALL\\s+)?SELECT)\\b.*)", // SQL keywords with context
+            "(?i)('\\s*(OR|AND)\\s*'|'\\s*;|--\\s|/\\*.*?\\*/|\\bUNION\\s+SELECT\\b|\\bSELECT\\s+.*\\bFROM\\b|\\bINSERT\\s+INTO\\b|\\bUPDATE\\s+.*\\bSET\\b|\\bDELETE\\s+FROM\\b|\\bDROP\\s+TABLE\\b)", 
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         );
         
@@ -53,17 +51,24 @@ public class InputValidationConfig {
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                 FilterChain filterChain) throws ServletException, IOException {
             
-            // Skip validation for static resources and actuator endpoints
+            // Skip validation for static resources and health endpoints
             String requestURI = request.getRequestURI();
             if (shouldSkipValidation(requestURI)) {
                 filterChain.doFilter(request, response);
                 return;
             }
             
+            // Only validate POST/PUT/PATCH requests with body content
+            String method = request.getMethod();
+            if (!("POST".equals(method) || "PUT".equals(method) || "PATCH".equals(method))) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
             // Validate request parameters
             if (containsMaliciousContent(request)) {
-                log.warn("SECURITY_ALERT: Malicious content detected in request from IP: {} to URI: {}", 
-                    getClientIpAddress(request), requestURI);
+                log.warn("SECURITY_ALERT: Malicious content detected in request from IP: {} to URI: {} - Method: {}", 
+                    getClientIpAddress(request), requestURI, method);
                 
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 response.setContentType("application/json");
@@ -80,19 +85,32 @@ public class InputValidationConfig {
             return uri.startsWith("/actuator/") || 
                    uri.startsWith("/swagger-ui/") || 
                    uri.startsWith("/api-docs/") ||
+                   uri.startsWith("/v3/api-docs") ||
                    uri.startsWith("/webjars/") ||
                    uri.equals("/health") ||
                    uri.equals("/ready") ||
+                   uri.equals("/") ||
+                   uri.equals("/login") ||
+                   uri.startsWith("/oauth2/") ||
+                   uri.startsWith("/auth/success") ||
                    uri.endsWith(".css") ||
                    uri.endsWith(".js") ||
                    uri.endsWith(".png") ||
-                   uri.endsWith(".ico");
+                   uri.endsWith(".jpg") ||
+                   uri.endsWith(".jpeg") ||
+                   uri.endsWith(".gif") ||
+                   uri.endsWith(".ico") ||
+                   uri.endsWith(".svg") ||
+                   uri.endsWith(".woff") ||
+                   uri.endsWith(".woff2") ||
+                   uri.endsWith(".ttf") ||
+                   uri.endsWith(".eot");
         }
         
         private boolean containsMaliciousContent(HttpServletRequest request) {
             // Check query parameters
             if (request.getQueryString() != null) {
-                String queryString = request.getQueryString().toLowerCase();
+                String queryString = request.getQueryString();
                 if (isMalicious(queryString)) {
                     return true;
                 }
@@ -102,16 +120,21 @@ public class InputValidationConfig {
             for (String paramName : request.getParameterMap().keySet()) {
                 String[] paramValues = request.getParameterValues(paramName);
                 for (String paramValue : paramValues) {
-                    if (paramValue != null && isMalicious(paramValue.toLowerCase())) {
+                    if (paramValue != null && isMalicious(paramValue)) {
                         return true;
                     }
                 }
             }
             
-            // Check headers for XSS attempts
-            String userAgent = request.getHeader("User-Agent");
-            if (userAgent != null && (XSS_PATTERN.matcher(userAgent).matches() || 
-                                     SQL_INJECTION_PATTERN.matcher(userAgent).matches())) {
+            // Only check specific headers that are commonly used for attacks
+            // Skip User-Agent as it often contains legitimate complex strings
+            String referer = request.getHeader("Referer");
+            if (referer != null && isMalicious(referer)) {
+                return true;
+            }
+            
+            String xForwardedFor = request.getHeader("X-Forwarded-For");
+            if (xForwardedFor != null && isMalicious(xForwardedFor)) {
                 return true;
             }
             
@@ -119,9 +142,16 @@ public class InputValidationConfig {
         }
         
         private boolean isMalicious(String input) {
-            boolean isXSS = XSS_PATTERN.matcher(input).matches();
-            boolean isSQLInjection = SQL_INJECTION_PATTERN.matcher(input).matches();
-            boolean isPathTraversal = PATH_TRAVERSAL_PATTERN.matcher(input).find();
+            if (input == null || input.trim().isEmpty()) {
+                return false;
+            }
+            
+            // Convert to lowercase for case-insensitive matching, but keep original for logging
+            String lowerInput = input.toLowerCase();
+            
+            boolean isXSS = XSS_PATTERN.matcher(lowerInput).find();
+            boolean isSQLInjection = SQL_INJECTION_PATTERN.matcher(lowerInput).find();
+            boolean isPathTraversal = PATH_TRAVERSAL_PATTERN.matcher(lowerInput).find();
             
             // Debug logging to identify which pattern is triggering
             if (isXSS || isSQLInjection || isPathTraversal) {
