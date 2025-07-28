@@ -14,11 +14,13 @@ import java.util.Optional;
 @Repository
 public interface EmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken, Long> {
     
-    Optional<EmailVerificationToken> findByToken(String token);
+    @Query("SELECT t FROM EmailVerificationToken t JOIN FETCH t.user WHERE t.token = :token")
+    Optional<EmailVerificationToken> findByToken(@Param("token") String token);
     
-    Optional<EmailVerificationToken> findByUserAndUsedFalse(User user);
+    @Query("SELECT t FROM EmailVerificationToken t JOIN FETCH t.user WHERE t.user = :user AND t.used = false")
+    Optional<EmailVerificationToken> findByUserAndUsedFalse(@Param("user") User user);
     
-    @Query("SELECT t FROM EmailVerificationToken t WHERE t.user = :user AND t.used = false AND t.expiryDate > :now")
+    @Query("SELECT t FROM EmailVerificationToken t JOIN FETCH t.user WHERE t.user = :user AND t.used = false AND t.expiryDate > :now")
     Optional<EmailVerificationToken> findValidTokenByUser(@Param("user") User user, @Param("now") LocalDateTime now);
     
     @Modifying

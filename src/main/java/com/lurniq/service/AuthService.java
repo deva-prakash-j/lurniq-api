@@ -4,10 +4,12 @@ import com.lurniq.dto.*;
 import com.lurniq.entity.User;
 import com.lurniq.repository.UserRepository;
 import com.lurniq.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -60,13 +62,17 @@ public class AuthService {
                 .build();
     }
     
-    public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+    public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
+        // Create authentication token with web details to preserve IP address
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                request.getEmail(),
+                request.getPassword()
         );
+        
+        // Set web authentication details to capture IP address
+        authToken.setDetails(new WebAuthenticationDetails(httpRequest));
+        
+        authenticationManager.authenticate(authToken);
         
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));

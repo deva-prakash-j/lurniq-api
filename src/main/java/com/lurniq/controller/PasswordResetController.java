@@ -84,19 +84,16 @@ public class PasswordResetController {
             @RequestParam String token) {
         
         try {
-            log.info("Verifying password reset token: {}", token.substring(0, Math.min(token.length(), 10)) + "...");
             
             Optional<User> userOpt = passwordResetService.verifyResetToken(token);
             
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
-                log.info("Valid password reset token for user: {}", user.getEmail());
+                log.info("Valid password reset token for user ID: {}", user.getId());
                 
                 return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "message", "Token is valid. You can now reset your password.",
-                    "email", user.getEmail(),
-                    "firstName", user.getFirstName()
+                    "message", "Token is valid. You can now reset your password."
                 ));
             } else {
                 log.warn("Invalid or expired password reset token");

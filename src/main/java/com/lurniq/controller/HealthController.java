@@ -1,5 +1,6 @@
 package com.lurniq.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import java.sql.Connection;
 import java.util.Map;
 
 @RestController
+@Slf4j
 public class HealthController {
     
     @Autowired
@@ -31,9 +33,11 @@ public class HealthController {
                 return ResponseEntity.ok(health);
             }
         } catch (Exception e) {
+            log.error("Database health check failed: {}", e.getMessage());
+            
             Map<String, Object> health = Map.of(
                 "status", "DOWN",
-                "database", "Error: " + e.getMessage(),
+                "database", "Connection failed",
                 "timestamp", System.currentTimeMillis()
             );
             
