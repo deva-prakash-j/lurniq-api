@@ -36,10 +36,10 @@ public class InputValidationConfig {
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         );
         
-        // SQL injection patterns
+        // SQL injection patterns - more precise to avoid false positives
         private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile(
-            "(?i)(.*('|(\\-\\-)|(;)|(\\|)|(\\*)|(%27)|(%2D%2D)|(%7C)|(%2A)).*)|" +
-            "(.*\\b(ALTER|CREATE|DELETE|DROP|EXEC(UTE){0,1}|INSERT( +INTO){0,1}|MERGE|SELECT|UPDATE|UNION( +ALL){0,1})\\b.*)",
+            "(?i)(.*('|(\\-\\-)|(%27)|(%2D%2D)).*)|" +  // Quote and comment patterns
+            "(.*\\b(ALTER\\s+TABLE|CREATE\\s+TABLE|DELETE\\s+FROM|DROP\\s+TABLE|EXEC(UTE)?\\s*\\(|INSERT\\s+INTO|SELECT\\s+.*\\s+FROM|UPDATE\\s+.*\\s+SET|UNION\\s+(ALL\\s+)?SELECT)\\b.*)", // SQL keywords with context
             Pattern.CASE_INSENSITIVE | Pattern.DOTALL
         );
         
@@ -81,6 +81,8 @@ public class InputValidationConfig {
                    uri.startsWith("/swagger-ui/") || 
                    uri.startsWith("/api-docs/") ||
                    uri.startsWith("/webjars/") ||
+                   uri.equals("/health") ||
+                   uri.equals("/ready") ||
                    uri.endsWith(".css") ||
                    uri.endsWith(".js") ||
                    uri.endsWith(".png") ||
@@ -117,9 +119,17 @@ public class InputValidationConfig {
         }
         
         private boolean isMalicious(String input) {
-            return XSS_PATTERN.matcher(input).matches() ||
-                   SQL_INJECTION_PATTERN.matcher(input).matches() ||
-                   PATH_TRAVERSAL_PATTERN.matcher(input).find();
+            boolean isXSS = XSS_PATTERN.matcher(input).matches();
+            boolean isSQLInjection = SQL_INJECTION_PATTERN.matcher(input).matches();
+            boolean isPathTraversal = PATH_TRAVERSAL_PATTERN.matcher(input).find();
+            
+            // Debug logging to identify which pattern is triggering
+            if (isXSS || isSQLInjection || isPathTraversal) {
+                log.debug("Malicious content detected - Input: '{}', XSS: {}, SQL: {}, PathTraversal: {}", 
+                         input, isXSS, isSQLInjection, isPathTraversal);
+            }
+            
+            return isXSS || isSQLInjection || isPathTraversal;
         }
         
         private String getClientIpAddress(HttpServletRequest request) {
