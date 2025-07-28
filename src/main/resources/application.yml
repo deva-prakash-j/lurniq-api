@@ -14,6 +14,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  
+  # Jackson Configuration for Java 8 Time
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    time-zone: UTC
+    date-format: yyyy-MM-dd'T'HH:mm:ss
+  
   security:
     oauth2:
       client:

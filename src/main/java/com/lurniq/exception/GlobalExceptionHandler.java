@@ -1,6 +1,12 @@
 package com.lurniq.exception;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -18,8 +24,96 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     
+    // JWT Exception Handlers
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Map<String, Object>> handleExpiredJwtException(
+            ExpiredJwtException ex, 
+            HttpServletRequest request
+    ) {
+        log.warn("JWT expired for request {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        Map<String, Object> errorResponse = createErrorResponse(
+            HttpStatus.UNAUTHORIZED,
+            "JWT_EXPIRED",
+            "Your session has expired. Please log in again.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+    
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<Map<String, Object>> handleSignatureException(
+            SignatureException ex, 
+            HttpServletRequest request
+    ) {
+        log.warn("Invalid JWT signature for request {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        Map<String, Object> errorResponse = createErrorResponse(
+            HttpStatus.UNAUTHORIZED,
+            "JWT_INVALID_SIGNATURE",
+            "Invalid token signature. Please log in again.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+    
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<Map<String, Object>> handleMalformedJwtException(
+            MalformedJwtException ex, 
+            HttpServletRequest request
+    ) {
+        log.warn("Malformed JWT for request {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        Map<String, Object> errorResponse = createErrorResponse(
+            HttpStatus.BAD_REQUEST,
+            "JWT_MALFORMED",
+            "Invalid token format. Please log in again.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    
+    @ExceptionHandler(UnsupportedJwtException.class)
+    public ResponseEntity<Map<String, Object>> handleUnsupportedJwtException(
+            UnsupportedJwtException ex, 
+            HttpServletRequest request
+    ) {
+        log.warn("Unsupported JWT for request {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        Map<String, Object> errorResponse = createErrorResponse(
+            HttpStatus.BAD_REQUEST,
+            "JWT_UNSUPPORTED",
+            "Unsupported token format. Please log in again.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Map<String, Object>> handleJwtException(
+            JwtException ex, 
+            HttpServletRequest request
+    ) {
+        log.warn("JWT validation error for request {}: {}", request.getRequestURI(), ex.getMessage());
+        
+        Map<String, Object> errorResponse = createErrorResponse(
+            HttpStatus.UNAUTHORIZED,
+            "JWT_ERROR",
+            "Token validation failed. Please log in again.",
+            request.getRequestURI()
+        );
+        
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+    
+    // Existing Exception Handlers
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(
             NoHandlerFoundException ex, 
