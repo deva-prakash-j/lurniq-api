@@ -60,20 +60,6 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           BASE_URL=${{ secrets.BASE_URL }}
           FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
-        metadata: |
-          apiVersion: serving.knative.dev/v1
-          kind: Service
-          metadata:
-            name: ${{ secrets.SERVICE_NAME }}
-            labels:
-              cloud.googleapis.com/location: ${{ secrets.GCP_REGION }}
-          spec:
-            template:
-              spec:
-                containers:
-                  - image: ${{ steps.build-image.outputs.image }}
-                scaling:
-                  minReplicas: 0 
-                  maxReplicas: 1
+        flags: --min-instances=0 --max-instances=1
     - name: Show service URL
       run: 'echo "Service URL: ${{ steps.deploy.outputs.url }}"'
