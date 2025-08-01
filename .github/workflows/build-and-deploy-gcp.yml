@@ -30,18 +30,51 @@ jobs:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
     - name: Configure Docker to use Google Artifact Registry
-      run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev 
+      run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
 
     - name: Build and push Docker image with Jib
       run: |
-         ./gradlew jib -Djib.to.image=asia-southeast1-docker.pkg.dev/gcp-cloud-engineer-429106/lurniq/lurniq-api:latest
-        # ./gradlew jibBuild -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
+        ./gradlew jibBuild -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
 
-    # - name: Deploy to Cloud Run
-    #   id: deploy
-    #   uses: google-github-actions/deploy-cloudrun@v2
-    #   with:
-    #     service: lurniq-api
-    #     project_id: ${{ secrets.GCP_PROJECT_ID }}
-    #     region: ${{ secrets.GCP_REGION }}
-    #     image: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
+    - name: Deploy to Cloud Run
+      id: deploy
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: ${{ secrets.SERVICE_NAME }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        region: ${{ secrets.GCP_REGION }}
+        image: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
+        env_vars: |
+          SPRING_PROFILES_ACTIVE=prod
+          PORT=8080
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_URI=${{ secrets.DB_URI }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          DDL_AUTO=${{ secrets.DDL_AUTO }}
+          EMAIL_FROM=${{ secrets.EMAIL_FROM }}
+          MAIL_HOST=${{ secrets.MAIL_HOST }}
+          MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+          MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          BASE_URL=${{ secrets.BASE_URL }}
+          FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
+        Optional: Configure minimum instances to 0 for cost optimization
+        metadata: |
+          apiVersion: serving.knative.dev/v1
+          kind: Service
+          metadata:
+            name: ${{ secrets.SERVICE_NAME }}
+            labels:
+              cloud.googleapis.com/location: ${{ secrets.GCP_REGION }}
+          spec:
+            template:
+              spec:
+                containers:
+                  - image: ${{ steps.build-image.outputs.image }}
+                scaling:
+                  minReplicas: 0 
+                  maxReplicas: 1
+    - name: Show service URL
+      run: 'echo "Service URL: ${{ steps.deploy.outputs.url }}"'

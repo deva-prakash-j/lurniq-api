@@ -44,7 +44,7 @@ spring:
             scope:
               - email
               - profile
-            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            redirect-uri: ${BASE_URL}/login/oauth2/code/google
         provider:
           google:
             authorization-uri: https://accounts.google.com/o/oauth2/auth
@@ -87,7 +87,7 @@ jwt:
 
 # OAuth2 Configuration
 oauth2:
-  redirect-url: ${OAUTH2_REDIRECT_URL:http://localhost:8080/auth/success}
+  redirect-url: ${BASE_URL}/auth/success
   frontend-base-url: ${FRONTEND_BASE_URL:http://localhost:4200/}
 # Logging Configuration
 logging:
