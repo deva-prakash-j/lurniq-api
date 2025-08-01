@@ -35,3 +35,12 @@ jobs:
     - name: Build and push Docker image with Jib
       run: |
         ./gradlew jibBuild -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
+
+    - name: Deploy to Cloud Run
+      id: deploy
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: lurniq-api
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        region: ${{ secrets.GCP_REGION }}
+        image: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
