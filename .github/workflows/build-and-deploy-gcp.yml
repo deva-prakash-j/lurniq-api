@@ -34,7 +34,7 @@ jobs:
 
     - name: Build and push Docker image with Jib
       run: |
-         ./gradlew jibBuild -Djib.to.image=asia-southeast1-docker.pkg.dev/gcp-cloud-engineer-429106/lurniq/lurniq-api:latest
+         ./gradlew jib -Djib.to.image=asia-southeast1-docker.pkg.dev/gcp-cloud-engineer-429106/lurniq/lurniq-api:latest
         # ./gradlew jibBuild -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
 
     # - name: Deploy to Cloud Run
