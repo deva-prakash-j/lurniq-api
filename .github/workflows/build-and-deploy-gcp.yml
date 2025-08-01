@@ -46,7 +46,6 @@ jobs:
         image: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
         env_vars: |
           SPRING_PROFILES_ACTIVE=prod
-          PORT=8080
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_URI=${{ secrets.DB_URI }}
           DB_USERNAME=${{ secrets.DB_USERNAME }}
