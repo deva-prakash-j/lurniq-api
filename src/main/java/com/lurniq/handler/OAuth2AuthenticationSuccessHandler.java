@@ -61,7 +61,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         if (isFrontend) {
             // Redirect to Angular app with tokens in URL fragments (more secure for SPAs)
             finalRedirectUrl = String.format(
-                "%s/auth/callback#access_token=%s&refresh_token=%s&token_type=Bearer", 
+                "%s/auth/oauth/callback?access_token=%s&refresh_token=%s&token_type=Bearer", 
                 frontendBaseUrl, token, refreshToken
             );
         } else {
