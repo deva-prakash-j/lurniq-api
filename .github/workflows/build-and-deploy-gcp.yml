@@ -59,6 +59,6 @@ jobs:
           GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           BASE_URL=${{ secrets.BASE_URL }}
           FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
-        flags: --min-instances=0 --max-instances=1
+        flags: --min-instances=0 --max-instances=1 --allow-unauthenticated
     - name: Show service URL
       run: 'echo "Service URL: ${{ steps.deploy.outputs.url }}"'
