@@ -3,17 +3,22 @@ spring:
   application:
     name: lurniq-api
   
+  # Startup performance optimizations
+  main:
+    lazy-initialization: true
+    banner-mode: "off"
+  
   datasource:
     url: ${DB_URI}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
+      maximum-pool-size: 5  # Reduced for faster startup
+      minimum-idle: 1       # Reduced for faster startup
       idle-timeout: 300000
       max-lifetime: 1200000
-      connection-timeout: 20000
+      connection-timeout: 10000  # Reduced timeout
       leak-detection-threshold: 60000
   
   # JPA Configuration
@@ -21,6 +26,7 @@ spring:
     hibernate:
       ddl-auto: ${DDL_AUTO:validate}  # Use 'update' for initial deployment, then 'validate'
     show-sql: false  # Disable in production
+    defer-datasource-initialization: true  # Faster startup
     properties:
       hibernate:
         format_sql: false

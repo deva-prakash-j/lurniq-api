@@ -11,7 +11,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class LurniqApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LurniqApiApplication.class, args);
+		SpringApplication app = new SpringApplication(LurniqApiApplication.class);
+		
+		// Performance optimizations for faster startup
+		app.setLazyInitialization(true);
+		
+		app.run(args);
 	}
 
 }

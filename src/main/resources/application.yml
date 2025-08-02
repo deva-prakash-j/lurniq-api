@@ -1,17 +1,23 @@
 spring:
   application:
     name: lurniq-api
+  
+  # Startup performance optimizations
+  main:
+    lazy-initialization: false  # Keep false in dev for better debugging
+    banner-mode: "console"
+  
   datasource:
     url: ${DB_URI}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
+      maximum-pool-size: 10  # Smaller pool for faster startup
+      minimum-idle: 2
       idle-timeout: 300000
       max-lifetime: 1200000
-      connection-timeout: 30000
+      connection-timeout: 15000  # Reduced timeout
       leak-detection-threshold: 60000
       validation-timeout: 5000
   jpa:

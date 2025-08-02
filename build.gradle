@@ -76,15 +76,20 @@ jib {
     container {
         jvmFlags = [
             "-Dspring.profiles.active=prod",
-            "-Xmx320m",
-            "-Xms128m",
+            "-Xmx768m",  // Increased for 1GB container
+            "-Xms256m",  // Increased initial heap
             "-XX:+UseG1GC",
             "-XX:+UseStringDeduplication",
             "-XX:+OptimizeStringConcat",
             "-XX:+UseCompressedOops",
+            "-XX:+UseCompressedClassPointers",
             "-XX:G1HeapRegionSize=8m",
             "-XX:MaxGCPauseMillis=200",
-            "-XX:MaxRAMPercentage=75.0"
+            "-XX:MaxRAMPercentage=75.0",
+            "-XX:+TieredCompilation",
+            "-XX:TieredStopAtLevel=1",  // Faster startup compilation
+            "-Xverify:none",  // Skip bytecode verification for faster startup
+            "-XX:+AlwaysPreTouch"  // Touch memory pages at startup
         ]
         ports = ["8080"]
         user = "1000:1000"
