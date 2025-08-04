@@ -26,20 +26,20 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # - name: Clean build and compile native executable
-    #   run: ./gradlew clean build nativeCompile --no-build-cache --refresh-dependencies
+    - name: Clean build and compile native executable
+      run: ./gradlew clean build nativeCompile --no-build-cache --refresh-dependencies
     
-    # - name: Verify native-image tool
-    #   run: |
-    #     ${{ env.JAVA_HOME }}/bin/native-image --version
-    #     # This should output something like 'GraalVM Native Image ...'
+    - name: Verify native-image tool
+      run: |
+        ${{ env.JAVA_HOME }}/bin/native-image --version
+        # This should output something like 'GraalVM Native Image ...'
 
-    # - name: Verify native executable exists and its name
-    #   run: |
-    #     echo "Contents of build/native/nativeCompile/:"
-    #     ls -l build/native/nativeCompile/
-    #     # This output is crucial! Copy the exact filename you see here.
-    #     # For example, if it's 'my-app', make sure image_name below is 'my-app'
+    - name: Verify native executable exists and its name
+      run: |
+        echo "Contents of build/native/nativeCompile/:"
+        ls -l build/native/nativeCompile/
+        # This output is crucial! Copy the exact filename you see here.
+        # For example, if it's 'my-app', make sure image_name below is 'my-app'
 
     - name: Authenticate to Google Cloud
       id: 'auth'
@@ -52,4 +52,4 @@ jobs:
 
     - name: Build and push Docker image with Jib
       run: |
-        ./gradlew jib -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
+        ./gradlew jibPush -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
