@@ -60,8 +60,8 @@ dependencies {
 
 // Optimize JAR for production
 jar {
-	enabled = false
-	archiveClassifier = ''
+	enabled = true
+	archiveClassifier = 'plain'
 }
 
 // Production optimizations
@@ -81,6 +81,7 @@ springBoot {
 graalvmNative {
     binaries {
         main {
+            mainClass = 'com.lurniq.LurniqApiApplication'
             buildArgs.addAll([
                 '--no-fallback',
                 '--enable-url-protocols=http,https',
@@ -88,7 +89,7 @@ graalvmNative {
                 '--install-exit-handlers',
                 '--gc=G1',
 				'-H:+ReportExceptionStackTraces',
-				 '--verbose'
+				'--verbose'
             ])
         }
     }
