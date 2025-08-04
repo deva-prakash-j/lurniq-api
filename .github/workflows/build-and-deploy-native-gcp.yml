@@ -26,8 +26,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    - name: Run tests with test profile
+      run: ./gradlew test
+      env:
+        SPRING_PROFILES_ACTIVE: test
+
     - name: Clean build and compile native executable
-      run: ./gradlew clean build nativeCompile --no-build-cache --refresh-dependencies
+      run: ./gradlew clean build nativeCompile -x test --no-build-cache --refresh-dependencies
     
     - name: Verify native-image tool
       run: |

@@ -1,0 +1,78 @@
+spring:
+  application:
+    name: lurniq-api-test
+  
+  # Use H2 in-memory database for tests
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Recreate schema for each test
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: false
+  
+  h2:
+    console:
+      enabled: false  # Disable H2 console for tests
+
+  # Disable OAuth2 for tests
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+  # Mock email configuration for tests
+  mail:
+    host: localhost
+    port: 25
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+# Mock JWT configuration for tests
+jwt:
+  secret: test-secret-key-that-is-long-enough-for-jwt-signing
+  expiration: 86400000
+  refresh-expiration: 604800000
+
+# Mock OAuth2 configuration for tests
+oauth2:
+  redirect-url: http://localhost:8080/auth/success
+  frontend-base-url: http://localhost:4200
+
+# Mock email configuration for tests
+email:
+  from: test@example.com
+  from-name: Test Team
+  activation:
+    subject: "Test Activation"
+    expiration-hours: 24
+    base-url: http://localhost:8080/auth/activate
+  password-reset:
+    subject: "Test Password Reset"
+    expiration-hours: 1
+    max-requests-per-hour: 3
+
+logging:
+  level:
+    org.springframework: WARN
+    com.lurniq: INFO
+    org.hibernate: WARN
