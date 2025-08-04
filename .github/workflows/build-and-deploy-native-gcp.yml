@@ -1,4 +1,4 @@
-name: Build and Deploy Native To GCP
+name: Build and Deploy JAR To GCP
 
 on:
   pull_request:
@@ -34,38 +34,18 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Run tests with test profile
-      run: ./gradlew test
+    - name: Build and test application
+      run: ./gradlew clean build --parallel
       env:
         SPRING_PROFILES_ACTIVE: test
-
-    - name: Clean build and compile native executable
-      run: ./gradlew clean build nativeCompile -x test --no-build-cache --refresh-dependencies --parallel
-      env:
         GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
     
-    - name: Verify native-image tool
+    - name: Verify JAR exists
       run: |
-        ${{ env.JAVA_HOME }}/bin/native-image --version
-        # This should output something like 'GraalVM Native Image ...'
-
-    - name: Verify native executable exists and its name
-      run: |
-        echo "Contents of build/native/nativeCompile/:"
-        ls -la build/native/nativeCompile/
-        # This output is crucial! Copy the exact filename you see here.
-        echo "Executable details:"
-        file build/native/nativeCompile/*
-
-    - name: Create Dockerfile for native image
-      run: |
-        cat > Dockerfile.native << 'EOF'
-        FROM gcr.io/distroless/base-debian12:latest
-        COPY build/native/nativeCompile/lurniq-api /app/
-        EXPOSE 8080
-        USER nonroot:nonroot
-        ENTRYPOINT ["/app/lurniq-api"]
-        EOF
+        echo "Contents of build/libs/:"
+        ls -la build/libs/
+        echo "JAR details:"
+        file build/libs/*.jar
 
     - name: Authenticate to Google Cloud
       id: 'auth'
@@ -76,8 +56,6 @@ jobs:
     - name: Configure Docker to use Google Artifact Registry
       run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
 
-    - name: Build and push native Docker image
+    - name: Build and push Docker image with Jib
       run: |
-        IMAGE_NAME="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest"
-        docker build -f Dockerfile.native -t $IMAGE_NAME .
-        docker push $IMAGE_NAME
+        ./gradlew jib -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
