@@ -52,9 +52,20 @@ jobs:
     - name: Verify native executable exists and its name
       run: |
         echo "Contents of build/native/nativeCompile/:"
-        ls -l build/native/nativeCompile/
+        ls -la build/native/nativeCompile/
         # This output is crucial! Copy the exact filename you see here.
-        # For example, if it's 'my-app', make sure image_name below is 'my-app'
+        echo "Executable details:"
+        file build/native/nativeCompile/*
+
+    - name: Create Dockerfile for native image
+      run: |
+        cat > Dockerfile.native << 'EOF'
+        FROM gcr.io/distroless/base-debian12:latest
+        COPY build/native/nativeCompile/lurniq-api /app/
+        EXPOSE 8080
+        USER nonroot:nonroot
+        ENTRYPOINT ["/app/lurniq-api"]
+        EOF
 
     - name: Authenticate to Google Cloud
       id: 'auth'
@@ -65,6 +76,8 @@ jobs:
     - name: Configure Docker to use Google Artifact Registry
       run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
 
-    - name: Build and push Docker image with Jib
+    - name: Build and push native Docker image
       run: |
-        ./gradlew jib -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
+        IMAGE_NAME="${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest"
+        docker build -f Dockerfile.native -t $IMAGE_NAME .
+        docker push $IMAGE_NAME

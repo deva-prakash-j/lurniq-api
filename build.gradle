@@ -88,27 +88,15 @@ graalvmNative {
                 '--install-exit-handlers',
                 '--gc=G1',
                 '-H:+ReportExceptionStackTraces',
-                // Optimization flags for faster builds
-                '-H:+UseCompilerAssertions',
-                '-H:+RemoveSaturatedTypeFlows',
-                '-H:+UseEpsilonGC', // Faster but uses more memory
-                '-Ob', // Optimize for size and speed
-                '--strict-image-heap',
-                // Reduce memory usage during build
+                // Memory optimization
                 '-J-Xmx4g',
                 '-J-Xms2g',
-                // Parallel compilation
-                '-H:+UseParallelGC',
-                '-H:NumberOfAnalysisThreads=4'
+                // Build optimization
+                '-H:+UseParallelGC'
             ])
-            // Set a reasonable timeout
-            jvmArgs = ['-Xmx8g', '-Xms4g']
+            // Set reasonable JVM args for the build process
+            jvmArgs = ['-Xmx6g', '-Xms2g']
         }
-    }
-    
-    // Enable agent for better optimization
-    agent {
-        defaultMode = "standard"
     }
 }
 
