@@ -112,7 +112,7 @@ jib {
             "-XX:+UseStringDeduplication",
             "-XX:+OptimizeStringConcat",
             "-XX:+UseCompressedOops",
-			"-XX:+UseContainerSupport",
+			//"-XX:+UseContainerSupport",
             "-XX:+UseCompressedClassPointers",
             "-XX:G1HeapRegionSize=8m",
             "-XX:MaxGCPauseMillis=200",
