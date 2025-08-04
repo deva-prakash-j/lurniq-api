@@ -123,7 +123,7 @@ jib {
         pluginExtension {
             implementation = 'com.google.cloud.tools.jib.gradle.extension.nativeimage.JibNativeImageExtension'
             properties = [
-                imageName: project.name.toLowerCase()
+                imageName: System.getProperty("jib.to.image", "lurniq/lurniq-api:latest")
             ]
         }
     }
