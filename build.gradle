@@ -1,7 +1,14 @@
+buildscript {
+    dependencies {
+        classpath 'com.google.cloud.tools:jib-native-image-extension-gradle:0.1.0' 
+    }
+}
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.graalvm.buildtools.native' version '0.10.2'
 	id("com.google.cloud.tools.jib") version "3.4.5"
 }
 
@@ -66,6 +73,20 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+graalvmNative {
+    binaries {
+        main {
+            buildArgs.addAll([
+                '--no-fallback',
+                '--enable-url-protocols=http,https',
+                '--verbose',
+                '--install-exit-handlers',
+                '--gc=G1YoungGeneration',
+            ])
+        }
+    }
+}
+
 jib {
     from {
         image = "eclipse-temurin:17-jdk-alpine"
@@ -97,5 +118,13 @@ jib {
         environment = [
             "SPRING_PROFILES_ACTIVE": "prod"
         ]
+    }
+	pluginExtensions {
+        pluginExtension {
+            implementation = 'com.google.cloud.tools.jib.gradle.extension.nativeimage.JibNativeImageExtension'
+            properties = [
+                imageName: project.name.toLowerCase()
+            ]
+        }
     }
 }
