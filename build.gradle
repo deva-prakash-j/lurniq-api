@@ -81,7 +81,7 @@ graalvmNative {
                 '--enable-url-protocols=http,https',
                 '--verbose',
                 '--install-exit-handlers',
-                '--gc=G1YoungGeneration',
+                '--gc=G1',
             ])
         }
     }
