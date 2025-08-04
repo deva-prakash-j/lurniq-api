@@ -23,6 +23,14 @@ jobs:
         distribution: 'graalvm'
         cache: 'gradle'
 
+    - name: Configure Gradle daemon
+      run: |
+        mkdir -p ~/.gradle
+        echo "org.gradle.daemon=true" >> ~/.gradle/gradle.properties
+        echo "org.gradle.parallel=true" >> ~/.gradle/gradle.properties
+        echo "org.gradle.configureondemand=true" >> ~/.gradle/gradle.properties
+        echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> ~/.gradle/gradle.properties
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
@@ -32,7 +40,9 @@ jobs:
         SPRING_PROFILES_ACTIVE: test
 
     - name: Clean build and compile native executable
-      run: ./gradlew clean build nativeCompile -x test --no-build-cache --refresh-dependencies
+      run: ./gradlew clean build nativeCompile -x test --no-build-cache --refresh-dependencies --parallel
+      env:
+        GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
     
     - name: Verify native-image tool
       run: |
@@ -57,4 +67,4 @@ jobs:
 
     - name: Build and push Docker image with Jib
       run: |
-        ./gradlew jibPush -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
+        ./gradlew jib -Djib.to.image=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest

@@ -14,30 +14,24 @@ import java.util.Map;
 @Slf4j
 public class HealthController {
     
-    // @Autowired
-    // private DataSource dataSource;
-    
+    @Autowired
+    private DataSource dataSource;
+
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
         try {
             // Test database connection
-            Map<String, Object> health = Map.of(
-                    "status",  "UP",
-                    "database", "Connected",
+            try (Connection connection = dataSource.getConnection()) {
+                boolean isValid = connection.isValid(5);
+                
+                Map<String, Object> health = Map.of(
+                    "status", isValid ? "UP" : "DOWN",
+                    "database", isValid ? "Connected" : "Disconnected",
                     "timestamp", System.currentTimeMillis()
-            );
-            return ResponseEntity.ok(health);
-            // try (Connection connection = dataSource.getConnection()) {
-            //     boolean isValid = connection.isValid(5);
+                );
                 
-            //     Map<String, Object> health = Map.of(
-            //         "status", isValid ? "UP" : "DOWN",
-            //         "database", isValid ? "Connected" : "Disconnected",
-            //         "timestamp", System.currentTimeMillis()
-            //     );
-                
-            //     return ResponseEntity.ok(health);
-            // }
+                return ResponseEntity.ok(health);
+            }
         } catch (Exception e) {
             log.error("Database health check failed: {}", e.getMessage());
             
