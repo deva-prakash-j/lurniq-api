@@ -86,7 +86,8 @@ graalvmNative {
                 '--verbose',
                 '--install-exit-handlers',
                 '--gc=G1',
-				'-H:+ReportExceptionStackTraces'
+				'-H:+ReportExceptionStackTraces',
+				 '--verbose'
             ])
         }
     }

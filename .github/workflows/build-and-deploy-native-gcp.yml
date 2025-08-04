@@ -27,7 +27,12 @@ jobs:
       run: chmod +x gradlew
 
     - name: Clean build and compile native executable
-      run: ./gradlew clean nativeCompile
+      run: ./gradlew clean build nativeCompile --no-build-cache --refresh-dependencies
+    
+    - name: Verify native-image tool
+      run: |
+        ${{ env.JAVA_HOME }}/bin/native-image --version
+        # This should output something like 'GraalVM Native Image ...'
 
     - name: Verify native executable exists and its name
       run: |
