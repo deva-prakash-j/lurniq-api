@@ -1,14 +1,7 @@
-buildscript {
-    dependencies {
-        classpath 'com.google.cloud.tools:jib-native-image-extension-gradle:0.1.0' 
-    }
-}
-
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.graalvm.buildtools.native' version '0.10.2'
 	id("com.google.cloud.tools.jib") version "3.4.5"
 }
 
@@ -58,12 +51,6 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-// Optimize JAR for production
-jar {
-	enabled = true
-	archiveClassifier = 'plain'
-}
-
 // Production optimizations
 bootJar {
 	archiveFileName = 'lurniq-api.jar'
@@ -72,30 +59,6 @@ bootJar {
 
 tasks.named('test') {
 	useJUnitPlatform()
-}
-
-springBoot {
-    mainClass = 'com.lurniq.LurniqApiApplication'
-}
-
-graalvmNative {
-    binaries {
-        main {
-            mainClass = 'com.lurniq.LurniqApiApplication'
-            buildArgs.addAll([
-                '--no-fallback',
-                '--enable-url-protocols=http,https',
-                '--install-exit-handlers',
-                '--gc=G1',
-                '-H:+ReportExceptionStackTraces',
-                // Memory optimization
-                '-J-Xmx4g',
-                '-J-Xms2g',
-            ])
-            // Set reasonable JVM args for the build process
-            jvmArgs = ['-Xmx6g', '-Xms2g']
-        }
-    }
 }
 
 jib {
@@ -129,13 +92,5 @@ jib {
         environment = [
             "SPRING_PROFILES_ACTIVE": "prod"
         ]
-    }
-	pluginExtensions {
-        pluginExtension {
-            implementation = 'com.google.cloud.tools.jib.gradle.extension.nativeimage.JibNativeImageExtension'
-            properties = [
-                imageName: System.getProperty("jib.to.image", "lurniq/lurniq-api:latest")
-            ]
-        }
     }
 }
