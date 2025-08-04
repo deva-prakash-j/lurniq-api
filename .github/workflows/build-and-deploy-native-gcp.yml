@@ -1,4 +1,4 @@
-name: Build and Deploy JAR To GCP
+name: Build and Deploy Native To GCP
 
 on:
   pull_request:
@@ -34,18 +34,27 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build and test application
-      run: ./gradlew clean build --parallel
+    - name: Run tests with test profile
+      run: ./gradlew test
       env:
         SPRING_PROFILES_ACTIVE: test
+
+    - name: Clean build and compile native executable
+      run: ./gradlew clean build nativeCompile -x test --no-build-cache --refresh-dependencies --parallel
+      env:
         GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g"
     
-    - name: Verify JAR exists
+    - name: Verify native-image tool
       run: |
-        echo "Contents of build/libs/:"
-        ls -la build/libs/
-        echo "JAR details:"
-        file build/libs/*.jar
+        ${{ env.JAVA_HOME }}/bin/native-image --version
+        # This should output something like 'GraalVM Native Image ...'
+
+    - name: Verify native executable exists and its name
+      run: |
+        echo "Contents of build/native/nativeCompile/:"
+        ls -l build/native/nativeCompile/
+        # This output is crucial! Copy the exact filename you see here.
+        # For example, if it's 'my-app', make sure image_name below is 'my-app'
 
     - name: Authenticate to Google Cloud
       id: 'auth'
