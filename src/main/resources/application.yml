@@ -6,6 +6,8 @@ spring:
   main:
     lazy-initialization: false  # Keep false in dev for better debugging
     banner-mode: "console"
+    # Enable component index for faster startup
+    allow-bean-definition-overriding: false
   
   datasource:
     url: ${DB_URI}
