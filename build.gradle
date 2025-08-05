@@ -2,16 +2,26 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
-	id("com.google.cloud.tools.jib") version "3.4.5"
+	//id("com.google.cloud.tools.jib") version "3.4.5"
+	id 'org.graalvm.buildtools.native' version '0.11.0'
 }
 
 group = 'com.lurniq'
 version = '0.0.1-SNAPSHOT'
 
+// java {
+// 	toolchain {
+// 		languageVersion = JavaLanguageVersion.of(17)
+// 	}
+// }
+
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+bootBuildImage {
+    builder.set("paketobuildpacks/builder:tiny")
 }
 
 configurations {
@@ -61,36 +71,51 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-jib {
-    from {
-        image = "eclipse-temurin:17-jdk-alpine"
-    }
-    to {
-        image = System.getProperty("jib.to.image", "lurniq/lurniq-api:latest")
-    }
-    container {
-        jvmFlags = [
-            "-Dspring.profiles.active=prod",
-            "-Xmx768m",  // Increased for 1GB container
-            "-Xms256m",  // Increased initial heap
-            "-XX:+UseG1GC",
-            "-XX:+UseStringDeduplication",
-            "-XX:+OptimizeStringConcat",
-            "-XX:+UseCompressedOops",
-			"-XX:+UseContainerSupport",
-            "-XX:+UseCompressedClassPointers",
-            "-XX:G1HeapRegionSize=8m",
-            "-XX:MaxGCPauseMillis=200",
-            "-XX:MaxRAMPercentage=75.0",
-            "-XX:+TieredCompilation",
-            "-XX:TieredStopAtLevel=1",  // Faster startup compilation
-            "-Xverify:none",  // Skip bytecode verification for faster startup
-            "-XX:+AlwaysPreTouch"  // Touch memory pages at startup
-        ]
-        ports = ["8080"]
-        user = "1000:1000"
-        environment = [
-            "SPRING_PROFILES_ACTIVE": "prod"
-        ]
+graalvmNative {
+    binaries {
+        main {
+            imageName = System.getProperty("app.name", "lurniq-api")
+			buildArgs = [
+                "-O2",
+                "--enable-url-protocols=http,https",
+                "--enable-https",
+                "--no-fallback"
+            ]
+        }
     }
 }
+
+
+// jib {
+//     from {
+//         image = "eclipse-temurin:17-jdk-alpine"
+//     }
+//     to {
+//         image = System.getProperty("jib.to.image", "lurniq/lurniq-api:latest")
+//     }
+//     container {
+//         jvmFlags = [
+//             "-Dspring.profiles.active=prod",
+//             "-Xmx768m",  // Increased for 1GB container
+//             "-Xms256m",  // Increased initial heap
+//             "-XX:+UseG1GC",
+//             "-XX:+UseStringDeduplication",
+//             "-XX:+OptimizeStringConcat",
+//             "-XX:+UseCompressedOops",
+// 			"-XX:+UseContainerSupport",
+//             "-XX:+UseCompressedClassPointers",
+//             "-XX:G1HeapRegionSize=8m",
+//             "-XX:MaxGCPauseMillis=200",
+//             "-XX:MaxRAMPercentage=75.0",
+//             "-XX:+TieredCompilation",
+//             "-XX:TieredStopAtLevel=1",  // Faster startup compilation
+//             "-Xverify:none",  // Skip bytecode verification for faster startup
+//             "-XX:+AlwaysPreTouch"  // Touch memory pages at startup
+//         ]
+//         ports = ["8080"]
+//         user = "1000:1000"
+//         environment = [
+//             "SPRING_PROFILES_ACTIVE": "prod"
+//         ]
+//     }
+// }

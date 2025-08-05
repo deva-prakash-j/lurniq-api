@@ -1,0 +1,14 @@
+FROM gcr.io/distroless/base-debian11
+USER nonroot:nonroot
+
+# Workdir inside the container
+WORKDIR /app
+
+# Copy native binary into image (adjust name if you renamed)
+COPY build/native/nativeCompile/lurniq-api .
+
+# Expose the app port
+EXPOSE 8080
+
+# Run the native binary
+ENTRYPOINT ["./lurniq-api"]
