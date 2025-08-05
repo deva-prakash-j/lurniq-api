@@ -51,3 +51,30 @@ jobs:
           IMAGE_NAME=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
           docker build -f Dockerfile.native -t $IMAGE_NAME .
           docker push $IMAGE_NAME
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: lurniq-api
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          region: ${{ secrets.GCP_REGION }}
+          image: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
+          env_vars: |
+            SPRING_PROFILES_ACTIVE=prod
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_URI=${{ secrets.DB_URI }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            DDL_AUTO=${{ secrets.DDL_AUTO }}
+            EMAIL_FROM=${{ secrets.EMAIL_FROM }}
+            MAIL_HOST=${{ secrets.MAIL_HOST }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            BASE_URL=${{ secrets.BASE_URL }}
+            FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
+          flags: --min-instances=0 --max-instances=1 --allow-unauthenticated --memory=1Gi --cpu-throttling --timeout=240
+      - name: Show service URL
+        run: 'echo "Service URL: ${{ steps.deploy.outputs.url }}"'
