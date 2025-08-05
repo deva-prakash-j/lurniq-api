@@ -1,7 +1,18 @@
-FROM cgr.dev/chainguard/glibc-dynamic:latest
+FROM debian:12-slim
+
+# Install only the essential runtime libraries
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appuser && useradd -r -g appuser appuser
 
 # Copy native binary into image
 COPY build/native/nativeCompile/lurniq-api /app/lurniq-api
+
+# Make sure the binary is executable and owned by appuser
+RUN chmod +x /app/lurniq-api && chown appuser:appuser /app/lurniq-api
+
+USER appuser
 
 # Workdir inside the container
 WORKDIR /app
