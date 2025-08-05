@@ -48,6 +48,6 @@ jobs:
 
       - name: 📤 Build and Push Native Docker Image
         run: |
-          IMAGE_NAME=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/${{ secrets.SERVICE_NAME }}:latest
+          IMAGE_NAME=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
           docker build -f Dockerfile.native -t $IMAGE_NAME .
           docker push $IMAGE_NAME
