@@ -49,7 +49,7 @@ jobs:
       - name: 📤 Build and Push Native Docker Image
         run: |
           IMAGE_NAME=${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lurniq/lurniq-api:latest
-          docker build -f Dockerfile.native -t $IMAGE_NAME .
+          docker build -f Dockerfile.native -t $IMAGE_NAME --platform linux/amd64 .
           docker push $IMAGE_NAME
 
       - name: Deploy to Cloud Run
@@ -75,6 +75,6 @@ jobs:
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             BASE_URL=${{ secrets.BASE_URL }}
             FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
-          flags: --min-instances=0 --max-instances=1 --allow-unauthenticated --memory=1Gi --cpu-throttling --timeout=300 --startup-cpu-boost
+          flags: --min-instances=0 --max-instances=1 --allow-unauthenticated --memory=1Gi --cpu-throttling --timeout=300 --startup-cpu-boost --platform=managed
       - name: Show service URL
         run: 'echo "Service URL: ${{ steps.deploy.outputs.url }}"'
