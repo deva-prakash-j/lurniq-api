@@ -1,5 +1,12 @@
-FROM gcr.io/distroless/base-debian11
-USER nonroot:nonroot
+FROM ubuntu:22.04-minimal
+
+# Install minimal runtime dependencies
+RUN apt-get update && apt-get install -y \
+    zlib1g \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appuser && useradd -r -g appuser appuser
+
+USER appuser
 
 # Workdir inside the container
 WORKDIR /app
