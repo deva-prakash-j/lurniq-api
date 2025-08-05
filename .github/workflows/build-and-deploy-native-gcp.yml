@@ -35,6 +35,9 @@ jobs:
       - name: 📦 Native Compile
         run: ./gradlew nativeCompile
 
+      - name: 📋 List native build output
+        run: ls -la build/native/nativeCompile/
+
       - name: 🔐 Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
