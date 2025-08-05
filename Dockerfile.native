@@ -1,18 +1,10 @@
-FROM ubuntu:22.04
+FROM cgr.dev/chainguard/glibc-dynamic:latest
 
-# Install minimal runtime dependencies
-RUN apt-get update && apt-get install -y \
-    zlib1g \
-    && rm -rf /var/lib/apt/lists/* \
-    && groupadd -r appuser && useradd -r -g appuser appuser
-
-USER appuser
+# Copy native binary into image
+COPY build/native/nativeCompile/lurniq-api /app/lurniq-api
 
 # Workdir inside the container
 WORKDIR /app
-
-# Copy native binary into image
-COPY build/native/nativeCompile/lurniq-api .
 
 # Expose the app port
 EXPOSE 8080
