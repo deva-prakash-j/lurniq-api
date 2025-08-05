@@ -1,19 +1,11 @@
-# Debug stage
-FROM ubuntu:22.04 AS debug
-WORKDIR /app
-COPY build/ build/
-RUN ls -la build/native/nativeCompile/ || echo "Directory not found"
-RUN ls -la build/native/nativeCompile/lurniq-api || echo "File not found"
-
-# Final stage
 FROM gcr.io/distroless/base-debian11
 USER nonroot:nonroot
 
 # Workdir inside the container
 WORKDIR /app
 
-# Copy native binary from debug stage
-COPY --from=debug /app/build/native/nativeCompile/lurniq-api .
+# Copy native binary into image
+COPY build/native/nativeCompile/lurniq-api .
 
 # Expose the app port
 EXPOSE 8080

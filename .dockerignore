@@ -5,6 +5,8 @@
 .gradle
 .vscode
 build
+# But include the native binary for native builds
+!build/native/nativeCompile/lurniq-api
 target
 *.md
 README.md
